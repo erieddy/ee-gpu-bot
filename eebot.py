@@ -9,6 +9,7 @@ import sys, getopt
 
 class EEbot():
     def __init__(self):
+        print('ee bot init')
         pass
 
     def best_buy_bot(self, bb_url, bb_user, bb_pass):
