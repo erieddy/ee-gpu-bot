@@ -1,1 +1,1 @@
-print('starting app')
+print('starting app up')
