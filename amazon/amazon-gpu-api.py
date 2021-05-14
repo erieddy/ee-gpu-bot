@@ -8,6 +8,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 import sys, getopt
 
 
+
+
 def main(argv):
     loginPassword = ''
     loginUsername = ''
