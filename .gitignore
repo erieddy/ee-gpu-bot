@@ -1,2 +1,8 @@
 #login ignore ini
 login.ini
+
+#virtual environments
+.env
+
+#py cache
+__pycache__
