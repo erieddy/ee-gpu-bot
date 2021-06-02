@@ -1,5 +1,5 @@
 #login ignore ini
-login.ini
+config.ini
 
 #virtual environments
 .env
