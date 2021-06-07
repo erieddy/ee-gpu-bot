@@ -28,7 +28,7 @@ class EEbot():
             signIn = browser.find_elements_by_class_name('btn-lg')
             signIn[0].click()
         except:
-            self.logger.info('failed to find the Best Buy login button on item %s. Exiting', desc)      
+            self.logger.info('failed to find the Best Buy login button on item "%s", Exiting', desc)      
         #wait for login to comnplete
         time.sleep(2)
 
@@ -43,7 +43,7 @@ class EEbot():
                 addtoCartBtn = browser.find_element_by_class_name('btn-disabled')
 
                 #print if button still disabled
-                self.logger.info('The Best Buy %s is out of stock. Refreshing page to check again.', desc)
+                self.logger.info('The Best Buy "%s" is out of stock. Refreshing page to check again.', desc)
 
                 #wait 1 second before performing hover
                 time.sleep(1)
@@ -54,15 +54,56 @@ class EEbot():
                 hover.perform()
 
             except:
-                #Attempt to add to cart set to true
-                tryAddToCart = True
+                self.logger.info('The "%s" is in stock! Attempting to add to cart', desc)
+            
 
                 #perform hover to get around bot detection 
-                element_to_hover_over = browser.find_element_by_class_name('hamburger-menu')
+                element_to_hover_over = browser.find_element_by_class_name('logo')
 
                 hover = ActionChains(browser).move_to_element(element_to_hover_over)
                 hover.perform()
-                print('The item is in stock! Starting Loop to add to cart')
+                
+                try:                       
+                    #try to add to cart
+                    addtoCartBtn  = browser.find_element_by_class_name('btn-primary')
+                    addtoCartBtn.click()
+
+                    #wait for page to load secondary step to checkout
+                    time.sleep(4)
+
+                    #Find move to cart button
+                    movetoCartBtn = browser.find_elements_by_class_name('btn-secondary')
+                    #Click move to cart the last item in the list 
+                    self.logger.info('Moving to cart button with lenght of %d', len(movetoCartBtn))
+                    
+                    movetoCartBtn[-1].click()
+
+                    self.logger.info('Successfuly added "%s" to the cart. Ending refresh loop.', desc)
+                    buyButton = True
+
+                    #wait for cart page to load
+                    time.sleep(2)
+
+                    #Find checkout button
+                    checkoutBtn = browser.find_elements_by_class_name('btn-primary')
+
+                    #click checkout button
+                    self.logger.info('Checkout button length %d',  len(checkoutBtn))
+                    checkoutBtn[0].click()
+                    time.sleep(10)
+
+                    #select 12 months finacing 
+                    finance12 = browser.find_element_by_id('reward-calculator-7')
+                    finance12.click()
+                    time.sleep(2)
+
+                    #Purchase Item
+                    purchase = browser.find_element_by_class_name('button__fast-track')
+                    purchase.click()
+
+                except:
+                    #add to cart failed 
+                    self.logger.error('Failed to add "%s" to cart. Reloading page.', desc)
 
         self.logger.info('Ending BestBuy thread')
 
@@ -91,12 +132,15 @@ class EEbot():
             signInButton = browser.find_elements_by_id('signInSubmit')
             signInButton[0].click()
         except:
-            self.logger.error('Failed to find the login button')
+            self.logger.error('Failed sign in to Amazon. Unable to find the login button.')
         #load item URL
         browser.get(amzn_url)
         time.sleep(2)
         self.logger.info('Ending Amazon thread')
-        
+
+    def newegg_bot(self, newegg_url, newegg_user, newegg_pass, desc=None):
+        pass    
+    
     def __init__(self, logger):
         self.logger = logger
         logger.info('EE bot is intializing and loading the required paramters')
@@ -116,6 +160,9 @@ class EEbot():
 
         self.bestbuy_user = config.get('bestbuy', 'bestbuy_user')
         self.bestbuy_pass = config.get('bestbuy', 'bestbuy_pass')
+
+        self.newegg_user = config.get('newegg', 'newegg_user')
+        self.newegg_pass = config.get('neweegg', 'newegg_pass')    
 
         self.logger.info('Completed loading in the required paramters, now loading URLs')
 
