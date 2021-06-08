@@ -28,7 +28,7 @@ class EEbot():
             signIn = browser.find_elements_by_class_name('btn-lg')
             signIn[0].click()
         except:
-            self.logger.info('failed to find the Best Buy login button on item "%s", Exiting', desc)      
+            self.logger.info('[bestbuy] failed to find the Best Buy login button on item "%s", Exiting', desc)      
         #wait for login to comnplete
         time.sleep(2)
 
@@ -43,7 +43,7 @@ class EEbot():
                 addtoCartBtn = browser.find_element_by_class_name('btn-disabled')
 
                 #print if button still disabled
-                self.logger.info('The Best Buy "%s" is out of stock. Refreshing page to check again.', desc)
+                self.logger.info('[bestbuy] The "%s" is out of stock. Refreshing page to check again.', desc)
 
                 #wait 1 second before performing hover
                 time.sleep(1)
@@ -54,7 +54,7 @@ class EEbot():
                 hover.perform()
 
             except:
-                self.logger.info('The "%s" is in stock! Attempting to add to cart', desc)
+                self.logger.info('[bestbuy] The "%s" is in stock! Attempting to add to cart', desc)
             
 
                 #perform hover to get around bot detection 
@@ -74,11 +74,11 @@ class EEbot():
                     #Find move to cart button
                     movetoCartBtn = browser.find_elements_by_class_name('btn-secondary')
                     #Click move to cart the last item in the list 
-                    self.logger.info('Moving to cart button with lenght of %d', len(movetoCartBtn))
+                    self.logger.info('[bestbuy] Moving to cart button with lenght of %d', len(movetoCartBtn))
                     
                     movetoCartBtn[-1].click()
 
-                    self.logger.info('Successfuly added "%s" to the cart. Ending refresh loop.', desc)
+                    self.logger.info('[bestbuy] Successfuly added "%s" to the cart. Ending refresh loop.', desc)
                     buyButton = True
 
                     #wait for cart page to load
@@ -88,7 +88,7 @@ class EEbot():
                     checkoutBtn = browser.find_elements_by_class_name('btn-primary')
 
                     #click checkout button
-                    self.logger.info('Checkout button length %d',  len(checkoutBtn))
+                    self.logger.info('[bestbuy] Checkout button length %d',  len(checkoutBtn))
                     checkoutBtn[0].click()
                     time.sleep(10)
 
@@ -103,9 +103,9 @@ class EEbot():
 
                 except:
                     #add to cart failed 
-                    self.logger.error('Failed to add "%s" to cart. Reloading page.', desc)
+                    self.logger.error('[bestbuy] Failed to add "%s" to cart. Reloading page.', desc)
 
-        self.logger.info('Ending BestBuy thread')
+        self.logger.info('[bestbuy] Ending thread')
 
     def amazon_bot(self, amzn_url, amzn_user, amzn_pass, amzn_max_price, desc=None):
         #self.logger.info('Amazon URL is %s', amzn_url)
@@ -132,7 +132,7 @@ class EEbot():
             signInButton = browser.find_elements_by_id('signInSubmit')
             signInButton[0].click()
         except:
-            self.logger.error('Failed sign in to Amazon. Unable to find the login button.')
+            self.logger.error('[amazon] Failed sign in to Amazon. Unable to find the login button.')
 
         time.sleep(2)
         self.logger.info('Pulling ASIN from URL.')
@@ -141,7 +141,7 @@ class EEbot():
         asinCode = asinCode.strip()
         self.logger.info('ASIN code is "' + asinCode +'".')
         url = 'https://www.amazon.com/gp/aws/cart/add.html?AssociateTag=brobot02-20&AWSAccessKeyId=AKIAIVQ27DOD3FLEYHJA&Quantity.1=1&ASIN.1=' + asinCode
-        self.logger.info('Clicking Amazon link for the "%s" with URL "%s"',  desc, url)
+        self.logger.info('[amazon] Clicking Amazon link for the "%s" with URL "%s"',  desc, url)
 
         amzn_check_stock = True
         while amzn_check_stock:
@@ -153,7 +153,7 @@ class EEbot():
             try: 
                 itemPrice = browser.find_element_by_class_name('price.item-row').text
             except: 
-                self.logger.error('Unable to find the "%s" price, it must be out of stock. Reload page and checking again.', desc)
+                self.logger.error('[amazon] Unable to find the "%s" price, it must be out of stock. Reload page and checking again.', desc)
                 continue
 
             '''Striping out extra characters in price'''
@@ -161,21 +161,21 @@ class EEbot():
             itemPrice = itemPrice.replace(',','')
             itemPrice = itemPrice.split('.')
             #<td nowrap="" class="price.item-row" valign="top">$1,699.99</td>
-            self.logger.info('The price of the "%s" is %s.', desc, itemPrice[0])
+            self.logger.info('[amazon] The price of the "%s" is %s.', desc, itemPrice[0])
             if itemPrice[0] < amzn_max_price:
-                self.logger.info('The price of %s is lower than the max price of %s for item "%s"', itemPrice[0], amzn_max_price, desc)
+                self.logger.info('[amazon] The price of %s is lower than the max price of %s for item "%s"', itemPrice[0], amzn_max_price, desc)
                 '''Price is good attempting to add to cart}'''
                 try:
                     browser.find_element_by_name('add').click()
                 except:
                     self.logger.error('Failed to click add to cart button')
 
-                self.logger.info('Attempting to move item to checkout for %s', desc)
+                self.logger.info('[amazon] Attempting to move item to checkout for %s', desc)
                 try:
                     browser.find_element_by_name('proceedToRetailCheckout').click()
                     time.sleep(2)
                 except:
-                    self.logger.error("Can't find move to cart button")
+                    self.logger.error("[amazon] Can't find move to cart button")
 
                 #place order
                 try:
@@ -183,14 +183,14 @@ class EEbot():
                     browser.find_element_by_name('placeYourOrder1').click()
 
                 except:
-                    self.logger.error('Failed to click place order')
+                    self.logger.error('[amazon] Failed to click place order')
                 '''Price is good so breaking out of while loop'''
                 amzn_check_stock = False
             else: 
-                self.logger.info('The price of %s is higher than the max price of %s for item "%s". Refreshing page and checking again.', itemPrice[0], amzn_max_price, desc)
+                self.logger.info('[amazon] The price of %s is higher than the max price of %s for item "%s". Refreshing page and checking again.', itemPrice[0], amzn_max_price, desc)
             #time.sleep(2)
 
-        self.logger.info('Ending Amazon thread')
+        self.logger.info('[amazon] Ending thread')
 
     def newegg_bot(self, newegg_url, newegg_user, newegg_pass, desc=None):
         pass    
@@ -227,7 +227,7 @@ class EEbot():
             reader = csv.reader(f)
             next(reader)
             for row in reader:
-                if row[0] == 'bestbuy2':
+                if row[0] == 'bestbuy':
                     x = threading.Thread(target=self.best_buy_bot, args=(row[2], self.bestbuy_user, self.bestbuy_pass, row[1],))
                 elif row[0] == 'amazon':
                     x = threading.Thread(target=self.amazon_bot, args=(row[2], self.amazon_user, self.amazon_pass, self.amazon_max_price, row[1],))
